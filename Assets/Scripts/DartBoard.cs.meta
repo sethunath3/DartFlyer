@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+guid: 1d9783d576b0a6b47a1ecd62c047271c
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - dartCell: {fileID: 1521399270785820, guid: a2b5378c41b053a40acb30cf33f2d16c, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

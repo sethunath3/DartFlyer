@@ -1,0 +1,13 @@
+# Exported from 3D Builder
+
+newmtl phong1SG
+Kd 1.000000 1.000000 1.000000
+map_Kd dart_phong1SG_BaseColor.png
+
+newmtl phong2SG
+Kd 1.000000 1.000000 1.000000
+map_Kd dart_phong2SG_BaseColor.png
+
+newmtl phong2SG
+Kd 1.000000 1.000000 1.000000
+map_Kd dart_phong2SG_BaseColor.png

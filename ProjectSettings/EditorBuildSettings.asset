@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/LoginSignup.unity
+    guid: 88b915360fe3c4e46839300446a4caa5
+  - enabled: 1
+    path: Assets/Scenes/MenuScreen.unity
+    guid: ac2dcdd9d3dffb342b3b8d38eb3edc85
+  - enabled: 1
+    path: Assets/Scenes/BetSelector.unity
+    guid: b444003ab8ae14245bd323f62f7a1b97
+  - enabled: 1
+    path: Assets/Scenes/GamePlayScene.unity
+    guid: 99c9720ab356a0642a771bea13969a05
+  - enabled: 1
+    path: Assets/Scenes/MultiPlayerTesting.unity
+    guid: 19c4e4c757befbd4ab53e9f7a1cf7b88
+  - enabled: 1
+    path: Assets/Scenes/SignUpScene.unity
+    guid: f8570f4811ef54740a736935c2578317
+  - enabled: 1
+    path: Assets/Scenes/SignInScene.unity
+    guid: cb38d73a025908d408be2e04b0bbd225
+  - enabled: 1
+    path: Assets/Scenes/SideBetScene.unity
+    guid: 0fe0f38d98b03a54d888bf5a0d7030dc
+  - enabled: 1
+    path: Assets/Scenes/HomeScreen.unity
+    guid: 6c5cda899246aaf47b2507159f6adb19
+  - enabled: 1
+    path: Assets/Scenes/FeedbackScene.unity
+    guid: 3e41b5b174d25a64688699b24ef18ec1
+  - enabled: 1
+    path: Assets/Scenes/GameGuide.unity
+    guid: c31ea6d67392d6a43acbe7dcb2bbd294
+  - enabled: 1
+    path: Assets/Scenes/ContactUs.unity
+    guid: e6afe88bb7cf89341bb4cfd6addf7f8f
+  - enabled: 1
+    path: Assets/Scenes/WebviewScene.unity
+    guid: cd543f3547d8b813ba3a129b8f6fe269
+  - enabled: 1
+    path: Assets/Scenes/WalletManagerScene.unity
+    guid: f63ee4a9f883db48b96006b21b0b6e49
+  m_configObjects: {}
