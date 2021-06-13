@@ -22,6 +22,10 @@
 # Visual Studio cache directory
 .vs/
 
+#Blend files due to the size constrain
+*.blend
+*.blend1
+
 # Gradle cache directory
 .gradle/
 
@@ -58,3 +62,4 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
+/Assets/Texture/board.001.png
