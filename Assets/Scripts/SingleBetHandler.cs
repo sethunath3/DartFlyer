@@ -16,12 +16,15 @@ public class SingleBetHandler : MonoBehaviour {
 
 	public GameObject popupPrefab;
 	public GameObject loaderPrefab;
+    [SerializeField] GameObject genericInfoPopup;
 	private DartGameUtils gameUtil;
+    bool isInitialized = false;
 	
 	void Start () {
-		userName.text = GameManager.userInfo.name;
+        genericInfoPopup.gameObject.SetActive(false);
+        userName.text = GameManager.userInfo.name;
 		gameUtil = new DartGameUtils();
-		betAmount = 10;
+		betAmount = gameUtil.betamountList[gameUtil.betamountList.Length-1];
 		betColour = UnityEngine.Random.Range(1,7);
 		GameManager.playerBets.Clear();
 		DartGameUtils.BetStructure betStruct = new DartGameUtils.BetStructure
@@ -31,14 +34,20 @@ public class SingleBetHandler : MonoBehaviour {
 		};
 		GameManager.playerBets.Add(betStruct);
 		GameManager.GetInstance().SetCurrentGameMode(DartGameUtils.GameMode.SinglebetMode);
-		betcolorIndicator.GetComponent<Image>().color = gameUtil.colourMap[betColour];
+
+        betcolorIndicator.GetComponent<Image>().color = gameUtil.colourMap[betColour];
 		betAmountDisplay.text = betAmount.ToString();
-	}
+        isInitialized = true;
+
+    }
 	
 	// Update is called once per frame
 	void Update () {
-		betcolorIndicator.GetComponent<Image>().color = gameUtil.colourMap[GameManager.playerBets[0].BetColour];
-		betAmountDisplay.text = GameManager.playerBets[0].BetAmount.ToString();
+        if(isInitialized)
+        {
+            betcolorIndicator.GetComponent<Image>().color = gameUtil.colourMap[GameManager.playerBets[0].BetColour];
+            betAmountDisplay.text = GameManager.playerBets[0].BetAmount.ToString();
+        }
 	}
 
 	public void OnPlaceBetBtnClick()
@@ -49,28 +58,37 @@ public class SingleBetHandler : MonoBehaviour {
 
 	public void OnGameenterButtonClick()
 	{
-		if(GameManager.userInfo.wallet_balance >= betAmount)
+		if(GameManager.userInfo.walletAmount >= GameManager.playerBets[0].BetAmount)
 		{
-			GameManager.GetInstance().betAmount = betAmount;
-			GameManager.GetInstance().betColour = betColour;
+			GameManager.GetInstance().betAmount = (int)GameManager.playerBets[0].BetAmount;
+			GameManager.GetInstance().betColour = GameManager.playerBets[0].BetColour;
 			GameManager.GetInstance().SetCurrentGameMode(DartGameUtils.GameMode.SinglebetMode);
 			GameManager.GetInstance().lobbyEntryTime = true;
 
 			
-			StartCoroutine(StartGameCall(DartGameUtils.GameMode.SinglebetMode,gameUtil.GetBetStructureJSON()));
+			//StartCoroutine(StartGameCall(DartGameUtils.GameMode.SinglebetMode,gameUtil.GetBetStructureJSON()));
+			StartCoroutine(StartGameCall(DartGameUtils.GameMode.SinglebetMode, GameManager.GetInstance().betAmount, GameManager.GetInstance().betColour));
 			GameObject loader = Instantiate (loaderPrefab, loaderPrefab.transform.position, loaderPrefab.transform.rotation) as GameObject;
 		}
+        else
+        {
+            genericInfoPopup.gameObject.SetActive(true);
+        }
 	}
 
-	IEnumerator StartGameCall(DartGameUtils.GameMode gameType, string betData) {
+	//IEnumerator StartGameCall(DartGameUtils.GameMode gameType, string betData) {
+	IEnumerator StartGameCall(DartGameUtils.GameMode gameType, int _betAmount, int _betColour) {
 
 		WWWForm form = new WWWForm();
-        form.AddField("user_id", GameManager.userInfo.id);
-        form.AddField("game_type", ((int)gameType).ToString());
-    	form.AddField("game_data", betData);
+        form.AddField("betAmount", _betAmount);
+        form.AddField("gameMode", ((int)gameType));
+    	form.AddField("betColor", _betColour);
 
-        UnityWebRequest www = UnityWebRequest.Post("http://182.18.139.143:8282/public/webresources/app/api/v1/game/start", form);
-        www.SetRequestHeader("Authorization", "Bearer "+GameManager.userToken);
+        Debug.Log("betAmount:" + _betAmount);
+
+        //UnityWebRequest www = UnityWebRequest.Post("http://182.18.139.143/WITSCLOUD/DEVELOPMENT/dartweb/index.php/api/createGameRoom", form);
+        UnityWebRequest www = UnityWebRequest.Post("https://dartplay.ml/index.php/api/createGameRoom", form);
+        www.SetRequestHeader("token", GameManager.userToken);
 		yield return www.SendWebRequest();
  
         if(www.isNetworkError || www.isHttpError) {
@@ -90,12 +108,12 @@ public class SingleBetHandler : MonoBehaviour {
             // Print Body
             Debug.Log(www.downloadHandler.text);
 
-			ResponseVO info = JsonUtility.FromJson<ResponseVO>(www.downloadHandler.text);
+			//ResponseVO info = JsonUtility.FromJson<ResponseVO>(www.downloadHandler.text);
 			JSONNode jsonNode = SimpleJSON.JSON.Parse(www.downloadHandler.text);
-			info.data = jsonNode["game"].ToString();
-			GameManager.currentGameId = jsonNode["game"]["id"];
-			GameManager.currentGameBetId = jsonNode["game"]["bets"][0];
-			if(info.status == "true")
+			//info.data = jsonNode["game"].ToString();
+			GameManager.currentGameId = jsonNode["gameId"];
+			//GameManager.currentGameBetId = jsonNode["game"]["bets"][0];
+			if(jsonNode["status"].Value == "Success")
 			{
 				Destroy(FindObjectOfType<AudioManager>());
 				GameSceneManager.LoadScene("GamePlayScene");

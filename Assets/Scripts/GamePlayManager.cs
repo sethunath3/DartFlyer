@@ -17,7 +17,10 @@ public class GamePlayManager : MonoBehaviour {
     private GameObject currentDart;
     public GameObject hudCanvas;
     public GameObject toastBg;
+    [SerializeField] GameObject pauseUi;
     private int[] throwResultArray;
+
+    private int exitScreen = 1;//BidSelectScreen
 
     private bool isGameScreenInteractable;
 
@@ -32,8 +35,9 @@ public class GamePlayManager : MonoBehaviour {
     int noOfDarts = 0;
     int noOfDartsThrown = 0;
 
-    float xyForce = 6.0f;
-    float zForce = 9.5f;
+    float xForce = 7.0f;
+    float yForce = 8.0f;
+    float zForce = 7.0f;
 
     int holdingCounter = 0;
     Vector2 startPos;
@@ -51,16 +55,20 @@ public class GamePlayManager : MonoBehaviour {
         //cheat
 
         isGameScreenInteractable = false;
+        pauseUi.SetActive(false);
 
-        if(GameManager.GetInstance().lobbyEntryTime)
+        if (GameManager.GetInstance().lobbyEntryTime)
         {
-            CreateScreenToast("",1);
+            //CreateScreenToast("",1);
+            FindObjectOfType<GenericPopup>().HidePopup();
+            toastBg.SetActive(false);
             GetComponent<Camera>().transform.position = CAMERA_INIT_POS;
             transform.DOMove(CAMERA_MEAN_POS, 4);
             GameManager.GetInstance().lobbyEntryTime = false;
             Invoke("InitGame", 4);
         }
         else{
+            FindObjectOfType<GenericPopup>().HidePopup();
             GetComponent<Camera>().transform.position = CAMERA_MEAN_POS;
             InitGame();
         }
@@ -69,12 +77,14 @@ public class GamePlayManager : MonoBehaviour {
     private void InitGame()
     {
         isDartThrown =false;
+        isHold = false;
         hudCanvas.GetComponent<CommentaryManager>().ResetIndicatorPanel();
 
         string toasterMsg = "";
         noOfDarts = 3;
+        noOfDartsThrown = 0;
 
-        if(GameManager.GetInstance().GetCurrentGameMode() == DartGameUtils.GameMode.PracticeMode)
+        if (GameManager.GetInstance().GetCurrentGameMode() == DartGameUtils.GameMode.PracticeMode)
         {
             currentBetColor = Random.Range(1,7);
         }
@@ -118,7 +128,7 @@ public class GamePlayManager : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-
+        
         if(!isGameScreenInteractable)
         {
             return;
@@ -131,97 +141,73 @@ public class GamePlayManager : MonoBehaviour {
         }
 
         if(isDartThrown)
+        {
             return;
+        }
+            
 
 
-//..............codes for testing puurpose
+// ..............codes for testing puurpose
             if(Input.GetButtonDown("Fire1"))
             {
-                startPos = Input.mousePosition;
-                currentPoint = Input.mousePosition;
-                holdingCounter = 0;
+                StartSwipe();
                 createDart();
             }
             else if(Input.GetButtonUp("Fire1"))
             {
-                endPos = Input.mousePosition;
+                EndSwipe();
                 throwDart();
             }
-            else{
+            else if(isHold)
+            {
                 if(Input.mousePosition.x == currentPoint.x && Input.mousePosition.y==currentPoint.y)//stationary
                 {
                     holdingCounter++;
                     if(holdingCounter >= 5)
                     {
-                        
+                        StartSwipe();
                     }
-                    startPos = Input.mousePosition;
-                        swipeStartTime = Time.time;
+                        
                 }
                 else{
                     Camera camera = GetComponent<Camera>();
                     Vector3 p = GetComponent<Camera>().ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y,camera.nearClipPlane + 5.5f));
                     currentDart.transform.position = new Vector3(p.x,p.y,p.z);
-                    holdingCounter = 0;
-                    currentPoint = Input.mousePosition;
+                    if (Input.mousePosition.y <= currentPoint.y)
+                    {
+                        StartSwipe();
+                    }
+                    else
+                    {
+                        holdingCounter = 0;
+                        currentPoint = Input.mousePosition;
+                    }
                 }
 
             }
 
             return;
-
-//..............codes for testing puurpose ends here
-
-
-            // if (Input.touchCount > 0) 
-            // {
-            //     Touch touch = Input.GetTouch(0);
-            //     switch (touch.phase)
-            //     {
-            //     //When a touch has first been detected, change the message and record the starting position
-            //         case TouchPhase.Began:
-            //             // Record initial touch position.
-            //             startPos = touch.position;
-            //             createDart();
-            //             break;
-
-            //         case TouchPhase.Ended:
-            //             // Report that the touch has ended when it ends
-            //             endPos = touch.position;
-            //             throwDart();
-            //             break;
-
-            //         //Determine if the touch is a moving touch
-            //         case TouchPhase.Moved:
-            //             // Determine direction by comparing the current touch position with the initial one
-            //             Camera camera = GetComponent<Camera>();
-            //             Vector3 p = GetComponent<Camera>().ScreenToWorldPoint(new Vector3(touch.position.x, touch.position.y,camera.nearClipPlane + 5.5f));
-            //             currentDart.transform.position = new Vector3(p.x,p.y,p.z);
-            //             break;
-
-
-            //         case TouchPhase.Stationary:
-            //             // Report that the touch has ended when it ends
-            //             startPos = touch.position;
-            //             swipeStartTime = Time.time;
-            //             break;
-
-            //         default :
-            //             // Report that the touch has ended when it ends
-            //             startPos = touch.position;
-            //             swipeStartTime = Time.time;
-            //             break;
-            //     }
-
-                
-            // }
              
 	}
 
+    private void StartSwipe()
+    {
+        startPos = Input.mousePosition;
+        currentPoint = Input.mousePosition;
+        swipeStartTime = Time.time;
+        holdingCounter = 0;
+        isHold = true;
+    }
+
+    private void EndSwipe()
+    {
+        endPos = Input.mousePosition;
+        swipeEndTime = Time.time;
+        isHold = false;
+    }
+
 	private void createDart()
     {
-        swipeStartTime = Time.time;
-
         Camera camera = GetComponent<Camera>();
 		Vector3 p = camera.ScreenToWorldPoint(new Vector3(startPos.x, startPos.y,camera.nearClipPlane + 5.5f ));
         currentDart = (GameObject)Instantiate(dart,new Vector3(p.x,p.y,p.z),Quaternion.identity);
@@ -234,8 +220,6 @@ public class GamePlayManager : MonoBehaviour {
 
 	private void throwDart()
     {
-        // marking time when you release it
-		swipeEndTime = Time.time;
 
 		// calculate swipe time interval 
 		swipeDuration = swipeEndTime - swipeStartTime;
@@ -248,7 +232,7 @@ public class GamePlayManager : MonoBehaviour {
 		currentDart.GetComponentInChildren<Rigidbody>().isKinematic = false;
         if(direction.x != 0 || direction.y != 0)
         {
-            currentDart.GetComponentInChildren<Rigidbody>().AddForce (-direction.x * xyForce,  -direction.y * xyForce, (zForce / swipeDuration)*200);
+            currentDart.GetComponentInChildren<Rigidbody>().AddForce (-direction.x * xForce,  -direction.y * yForce, (zForce / swipeDuration)*200);
         }
 
         currentDart.SetActive(true);    
@@ -258,7 +242,7 @@ public class GamePlayManager : MonoBehaviour {
 
         currentDart = null;
 
-        Invoke("ProcessNonHitThrowResult",3);
+        // Invoke("ProcessNonHitThrowResult",3);
     }
 
     public void HitOnDartBoard(GameObject dartCell)
@@ -281,7 +265,23 @@ public class GamePlayManager : MonoBehaviour {
         ProcessResultAndProceedToNext();
     }
 
-    private void ProcessNonHitThrowResult()
+    public void HitOnBoard()
+    {
+        if(throwResultArray[noOfDartsThrown-1]==2)
+        {
+            // throwResultArray[noOfDartsThrown-1] = 2;
+            // hudCanvas.GetComponent<CommentaryManager>().ToggleIndicator(noOfDartsThrown,2);
+            // noOfDartsThrown--;
+            throwResultArray[noOfDartsThrown-1] = 0;
+            hudCanvas.GetComponent<CommentaryManager>().ToggleIndicator(noOfDartsThrown,2);
+
+            //dart didnt hit on the board
+            // isDartThrown = false;
+        }
+        ProcessResultAndProceedToNext();
+    }
+
+    public void ProcessNonHitThrowResult()
     {
         if(throwResultArray[noOfDartsThrown-1]==2)
         {
@@ -311,25 +311,32 @@ public class GamePlayManager : MonoBehaviour {
                 {
                     score++;
                 }
-            }
-            if(score ==3)
-            {
-                CreateScreenToast("EXCELLENT", 4);
-            }
-            else if(score == 2)
-            {
-                CreateScreenToast("NICE", 4);
-            }
-            else{
-                CreateScreenToast("TRAIN HARDER!!", 4);
+                if (throwResultArray[i] == 2)
+                {
+                    throwResultArray[i] = 0;
+                }
             }
             
             if(GameManager.GetInstance().GetCurrentGameMode() == DartGameUtils.GameMode.SinglebetMode)
             {
+                Debug.Log("This is happening 2");
                 StartCoroutine(EndGameCall());
             }
             else
             {
+                Debug.Log("Working fine");
+                if (score == 3)
+                {
+                    CreateScreenToast("EXCELLENT", 4);
+                }
+                else if (score == 2)
+                {
+                    CreateScreenToast("NICE", 4);
+                }
+                else
+                {
+                    CreateScreenToast("TRAIN HARDER!!", 4);
+                }
                 Invoke("RefreshScene", 4);
             }
         }
@@ -338,6 +345,7 @@ public class GamePlayManager : MonoBehaviour {
 
     private void RefreshScene()
     {
+        Debug.Log("Yes it is practice");
         if(GameManager.GetInstance().GetCurrentGameMode() == DartGameUtils.GameMode.PracticeMode)
         {
             GameSceneManager.LoadScene("GamePlayScene");
@@ -346,23 +354,36 @@ public class GamePlayManager : MonoBehaviour {
 
     string GetGameResultArray()
     {
-        string gameResultArray = "[{\"id\":\"" + GameManager.currentGameBetId +
+        /*string gameResultArray = "[{\"id\":\"" + GameManager.currentGameBetId +
         "\",\"t1\":\"" + throwResultArray[0].ToString() +
         "\",\"t2\":\"" + throwResultArray[1].ToString() +
         "\",\"t3\":\"" + throwResultArray[2].ToString() +
-        "\"}]";
+        "\"}]";*/
+
+        for(int i =0; i<noOfDarts; i++)
+        {
+            if(throwResultArray[i] == 2)
+            {
+                throwResultArray[i] = 0;
+            }
+        }
+
+        string gameResultArray = throwResultArray[0].ToString() +
+        "-" + throwResultArray[1].ToString() +
+        "-" + throwResultArray[2].ToString();
         return gameResultArray;
     }
 
     IEnumerator EndGameCall() {
+        Debug.Log("This is happening 1");
+        WWWForm form = new WWWForm();
+        //form.AddField("user_id", GameManager.userInfo.id);
+        form.AddField("gameId", GameManager.currentGameId);
+    	form.AddField("result", GetGameResultArray());
 
-		WWWForm form = new WWWForm();
-        form.AddField("user_id", GameManager.userInfo.id);
-        form.AddField("game_id", GameManager.currentGameId);
-    	form.AddField("game_result", GetGameResultArray());
-
-        UnityWebRequest www = UnityWebRequest.Post("http://182.18.139.143:8282/public/webresources/app/api/v1/game/exit", form);
-        www.SetRequestHeader("Authorization", "Bearer "+GameManager.userToken);
+        //UnityWebRequest www = UnityWebRequest.Post("http://182.18.139.143/WITSCLOUD/DEVELOPMENT/dartweb/index.php/api/gameComplete", form);
+        UnityWebRequest www = UnityWebRequest.Post("https://dartplay.ml/index.php/api/gameComplete", form);
+        www.SetRequestHeader("token", GameManager.userToken);
 		yield return www.SendWebRequest();
  
         if(www.isNetworkError || www.isHttpError) {
@@ -370,7 +391,7 @@ public class GamePlayManager : MonoBehaviour {
         }
         else {
             Debug.Log("Form upload complete!");
-						StringBuilder sb = new StringBuilder();
+			StringBuilder sb = new StringBuilder();
             foreach (System.Collections.Generic.KeyValuePair<string, string> dict in www.GetResponseHeaders())
             {
                 sb.Append(dict.Key).Append(": \t[").Append(dict.Value).Append("]\n");
@@ -382,29 +403,43 @@ public class GamePlayManager : MonoBehaviour {
             // Print Body
             Debug.Log(www.downloadHandler.text);
 
-			ResponseVO info = JsonUtility.FromJson<ResponseVO>(www.downloadHandler.text);
 			JSONNode jsonNode = SimpleJSON.JSON.Parse(www.downloadHandler.text);
-			info.data = jsonNode["data"].ToString();
-			if(info.status == "true")
+			if(jsonNode["status"].Value == "Success")
 			{
-                long prevBalance = GameManager.userInfo.wallet_balance;
-                GameManager.userInfo = JsonUtility.FromJson<UserInfo>(info.data);
-                long  gain = GameManager.userInfo.wallet_balance - prevBalance;
-                FindObjectOfType<GenericPopup>().ShowPopup();
-                if(gain > 0)
-                {
-                    FindObjectOfType<GenericPopup>().SetTextTo("hurreeyyy.....You Won " + gain.ToString() + " Montero");
-                }
-                else{
-                    FindObjectOfType<GenericPopup>().SetTextTo("Better Luck Next time");
-                }
+
+                JSONNode  userDataResponse = ServerCalls.GetUserInfo();
+				if(userDataResponse["status"].Value == "Success")
+				{
+					long  gain = int.Parse(jsonNode["winningAmount"].ToString());
+                    FindObjectOfType<GenericPopup>().ShowPopup();
+                    if(gain > 0)
+                    {
+                        FindObjectOfType<GenericPopup>().SetTextTo("hurreeyyy.....You Won " + gain.ToString() + " Montero");
+                    }
+                    else{
+                        FindObjectOfType<GenericPopup>().SetTextTo("Better Luck Next time");
+                    }
+
+                    Debug.Log("This is happening");
+				}
+				//else{
+					//Destroy(loader);
+					//errorMsg.text = userDataResponse["message"].ToString();
+				//}
 			}
         }
     }
 
     public void ExitToMenu()
     {
-        GameSceneManager.LoadScene("BetSelector");
+        if(exitScreen == 1)
+        {
+            GameSceneManager.LoadScene("BetSelector");
+        }
+        else
+        {
+            GameSceneManager.LoadScene("MenuScreen");
+        }
     }
 
     private void CreateScreenToast(string toastMsg, float duration)
@@ -419,11 +454,24 @@ public class GamePlayManager : MonoBehaviour {
         toastBg.SetActive(false);
     }
 
-    public void OnBackButtonClick()
+    public void OnExitGameClick(int _exitScreen)
 	{
-        if(GameManager.GetInstance().GetCurrentGameMode() == DartGameUtils.GameMode.PracticeMode)
+        exitScreen = _exitScreen;
+        noOfDartsThrown = noOfDarts;
+        ProcessResultAndProceedToNext();
+        pauseUi.SetActive(false);
+
+    }
+
+    public void OnBackClick()
+    {
+        if (GameManager.GetInstance().GetCurrentGameMode() == DartGameUtils.GameMode.PracticeMode)
         {
             GameSceneManager.LoadScene("MenuScreen");
         }
-	}
+        else
+        {
+            pauseUi.SetActive(true);
+        }
+    }
 }

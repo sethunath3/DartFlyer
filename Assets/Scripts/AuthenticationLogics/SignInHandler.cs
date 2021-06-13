@@ -12,10 +12,19 @@ public class SignInHandler : MonoBehaviour {
 	public Text errorMsg;
     public InputField password;
 	private GameObject loader;
+	private bool saveUser;
 	void Start () {
+		saveUser = false;
 		errorMsg.text = "";
 		loader =  null;
 		TouchScreenKeyboard.hideInput = true;
+
+		if(PlayerPrefs.GetString("SAVED_EMAIL", "") != "")
+		{
+			email.text = PlayerPrefs.GetString("SAVED_EMAIL");
+			password.text = PlayerPrefs.GetString("SAVED_PASSWORD");
+			StartCoroutine(DoLogin());
+		}
 	}
 	
 	// Update is called once per frame
@@ -30,6 +39,11 @@ public class SignInHandler : MonoBehaviour {
 
 	public void OnSigninBtnClick()
 	{	
+		StartCoroutine(DoLogin());
+	}
+
+	IEnumerator DoLogin()
+	{
 		//cheat
 		if(email.text == "")
 		{
@@ -42,20 +56,71 @@ public class SignInHandler : MonoBehaviour {
 		else                                                                                                      
 		{
 			loader = Instantiate (loaderPrefab, loaderPrefab.transform.position, loaderPrefab.transform.rotation) as GameObject;
-			ServerCalls.ResponseVO loginResponse = ServerCalls.ValidateUserWithEmail(email.text, password.text);
-			if(loginResponse.status == "true")
-			{
-				UserInfo userDetails = new UserInfo();
-				GameManager.userInfo = JsonUtility.FromJson<UserInfo>(loginResponse.data);
-				GameManager.userToken  = loginResponse.token;
-				// StartCoroutine(UpdateUserLeaderBoard());
-				GameSceneManager.LoadScene("HomeScreen");
-			}
-			else{
+			
+			WWWForm form = new WWWForm();
+        	form.AddField("email", email.text);
+        	form.AddField("password", password.text);
+
+            //UnityWebRequest www = UnityWebRequest.Post("http://182.18.139.143/WITSCLOUD/DEVELOPMENT/dartweb/index.php/api/login", form);
+            UnityWebRequest www = UnityWebRequest.Post("https://dartplay.ml/index.php/Api/login", form);
+            yield return www.SendWebRequest();
+
+        	if(www.isNetworkError || www.isHttpError) {
+            	Debug.Log(www.error);
 				Destroy(loader);
-				errorMsg.text = loginResponse.message;
+        	}
+        	else {
+            	Debug.Log("Form upload complete!");
+				StringBuilder sb = new StringBuilder();
+            	foreach (System.Collections.Generic.KeyValuePair<string, string> dict in www.GetResponseHeaders())
+            	{
+                	sb.Append(dict.Key).Append(": \t[").Append(dict.Value).Append("]\n");
+            	}
+            	// Print Headers
+            	Debug.Log("header" + sb.ToString());
+
+            	// Print Body
+            	Debug.Log("Body:" + www.downloadHandler.text);
+			
+				JSONNode loginResponse = SimpleJSON.JSON.Parse(www.downloadHandler.text);
+
+
+                if (loginResponse["status"].ToString() == "true")
+				{
+					GameManager.userInfo = JsonUtility.FromJson<UserInfo>(loginResponse["userData"].ToString());
+					GameManager.userToken  = GameManager.userInfo.token;
+
+                    Debug.Log("user token: " + GameManager.userToken);
+					JSONNode  userDataResponse = ServerCalls.GetUserInfo();
+                    Debug.Log("userDataResponse:: " + userDataResponse.ToString());
+					string response = userDataResponse["status"].Value;
+					if(response == "Success")
+					{
+						if(saveUser)
+						{
+							PlayerPrefs.SetString("SAVED_EMAIL", email.text);
+							PlayerPrefs.SetString("SAVED_PASSWORD", password.text);
+							PlayerPrefs.Save();
+						}
+						GameSceneManager.LoadScene("HomeScreen");
+					}
+					else{
+						Destroy(loader);
+						errorMsg.text = userDataResponse["message"].ToString();
+					}
+				}
+				else
+				{
+					Destroy(loader);
+					errorMsg.text = loginResponse["message"].ToString();
+				}
 			}
 		}
+	}
+
+	public void ToggleSaveUser()
+	{
+		saveUser = !saveUser;
 	}
 
 	public void ToggleInputType() 
@@ -81,6 +146,12 @@ public class SignInHandler : MonoBehaviour {
     public void ForgotButtonPressed()
     {
         
+    }
+
+	public void NewPlayerClicked()
+    {
+        Application.OpenURL("http://dartplay.ml/index.php/home/joinus");
+        //GameSceneManager.LoadScene("SignUpScene");
     }
 
   IEnumerator UpdateUserLeaderBoard() 

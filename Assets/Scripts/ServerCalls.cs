@@ -35,27 +35,27 @@ public class ServerCalls : MonoBehaviour {
 	}
 
 
-	public static ResponseVO ValidateUserWithEmail(string email, string password)
-  {
-    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(String.Format("http://182.18.139.143:8282/public/webresources/app/api/v1/account/login?username={0}&password={1}", email, password));
-    request.Timeout = 9000;
-		request.Method = "POST";
-    request.ReadWriteTimeout = 9000;
-					HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+public static JSONNode ValidateUserWithEmail(string email, string password)
+{
+    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(String.Format("http://182.18.139.143/WITSCLOUD/DEVELOPMENT/dartweb/index.php/api/login?email={0}&password={1}", email, password));
+    //request.Timeout = 9000;
+	request.Method = "POST";
+    //request.ReadWriteTimeout = 9000;
+	HttpWebResponse response = (HttpWebResponse)request.GetResponse();
           StreamReader reader = new StreamReader(response.GetResponseStream());
           string jsonResponse = reader.ReadToEnd();
 					ResponseVO info = JsonUtility.FromJson<ResponseVO>(jsonResponse);
 					JSONNode jsonNode = SimpleJSON.JSON.Parse(jsonResponse);
-					info.data = jsonNode["data"].ToString();
+					//info.data = jsonNode["data"].ToString();
 					//Debug.Log ("Department 0 "+ jsonNode[0].ToString());
 					//UserInfo userDetails = JsonUtility.FromJson<UserInfo>(jsonNode["data"].ToString());
           
-          return info;
+          return jsonNode;
   }
 
-	public static ResponseVO SignUpUser(string userName,string email, string password)
+	public static JSONNode SignUpUser(string userName,string email, string password)
 	{
-					HttpWebRequest request = (HttpWebRequest)WebRequest.Create(String.Format("http://182.18.139.143:8282/public/webresources/app/api/v1/account/create?name={0}&userid={1}&email={2}&password={3}", userName, email, email, password));
+					HttpWebRequest request = (HttpWebRequest)WebRequest.Create(String.Format("http://182.18.139.143/WITSCLOUD/DEVELOPMENT/dartweb/index.php/api/register?name={0}&username={1}&email={2}&password={3}", userName, email, email, password));
           //request.Timeout = 5000;
 					request.Method = "POST";
     			//request.ReadWriteTimeout = 5000;
@@ -68,8 +68,39 @@ public class ServerCalls : MonoBehaviour {
 					//Debug.Log ("Department 0 "+ jsonNode[0].ToString());
 					//UserInfo userDetails = JsonUtility.FromJson<UserInfo>(jsonNode["data"].ToString());
           
-          return info;
+          return jsonNode;
 	}
+
+public static JSONNode GetUserInfo()
+{
+        //string requestString = String.Format("http://182.18.139.143/WITSCLOUD/DEVELOPMENT/dartweb/index.php/api/getUserInfo");
+        string requestString = String.Format("https://dartplay.ml/index.php/api/getUserInfo");
+        HttpWebRequest request = (HttpWebRequest)WebRequest.Create(requestString);
+	//request.Headers.Add("Authorization", "Bearer "+GameManager.userToken);
+	request.Headers.Add("token", GameManager.userToken);
+    request.Timeout = 9000;
+	request.Method = "POST";
+
+	HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+    StreamReader reader = new StreamReader(response.GetResponseStream());
+    string jsonResponse = reader.ReadToEnd();
+	JSONNode jsonNode = SimpleJSON.JSON.Parse(jsonResponse);    
+
+	string status = jsonNode["status"].Value;
+	if(status == "Success")
+	{
+		GameManager.userInfo = JsonUtility.FromJson<UserInfo>(jsonNode["userData"].ToString());
+		List<GameHistory> tempGameHistory = new List<GameHistory>();
+		for(int i =0; i< 3; i++)
+		{
+			GameHistory gh = JsonUtility.FromJson<GameHistory>(jsonNode["gameData"][i].ToString());
+			tempGameHistory.Add(gh);
+		}
+		GameManager.gameHistory = tempGameHistory;
+	}
+
+    return jsonNode;
+}
 
 	public static ResponseVO EnterGameRoom(DartGameUtils.GameMode gameType, string betData)
 	{

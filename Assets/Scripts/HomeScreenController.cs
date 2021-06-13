@@ -16,10 +16,10 @@ public class HomeScreenController : MonoBehaviour {
 		userName.text = GameManager.userInfo.name;
 		uName.text = ": "+GameManager.userInfo.name;
 		email.text = ": "+GameManager.userInfo.email;
-		walletBalance.text = "Amount in your wallet: "+ GameManager.userInfo.wallet_balance;
-		earningsValue.text = ": $"+GameManager.userInfo.total_earnings.ToString();
-		winningStrikes.text = ": "+GameManager.userInfo.winning_strikes.ToString();
-		totalGames.text = ": "+(GameManager.userInfo.total_sidebet + GameManager.userInfo.total_single).ToString();
+		walletBalance.text = "Amount in your wallet: "+ GameManager.userInfo.walletAmount;
+		earningsValue.text = ": $"+(GameManager.gameHistory[0].totalEarning + GameManager.gameHistory[1].totalEarning + GameManager.gameHistory[2].totalEarning).ToString();
+		winningStrikes.text = ": "+(GameManager.gameHistory[0].winningStrike + GameManager.gameHistory[1].winningStrike + GameManager.gameHistory[2].winningStrike).ToString();
+		totalGames.text = ": "+(GameManager.gameHistory[0].totalMatches + GameManager.gameHistory[1].totalMatches + GameManager.gameHistory[2].totalMatches).ToString();
 	}
 	
 	// Update is called once per frame

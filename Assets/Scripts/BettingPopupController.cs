@@ -24,10 +24,6 @@ public class BettingPopupController : MonoBehaviour {
 		RefreshComponentsAndData();
 
 		PopupCanvas.SetActive(true);
-		if(GameManager.GetInstance().GetCurrentGameMode() == DartGameUtils.GameMode.SinglebetMode)
-		{
-			GameManager.playerBets.Clear();
-		}
 	}
 	
 	// Update is called once per frame

@@ -15,6 +15,7 @@ public class GameManager  : MonoBehaviour{
 	public bool lobbyEntryTime = false;
     public static List<DartGameUtils.BetStructure> playerBets = new List<DartGameUtils.BetStructure>{};
 	public static UserInfo userInfo;
+    public static List<GameHistory> gameHistory = new List<GameHistory>();
     public static string userToken;
 
 

@@ -18,7 +18,7 @@ public class DartBoard : MonoBehaviour {
 		// 	Debug.Log(asprite.name);
         //  }
 
-		float cellGap = 0.05f;
+		float cellGap = 0.0f;
 		float boardBorderWidth = 0.6f;
 		int noOfCellRows = 6;
 		float cellWidth = (transform.localScale.x-(boardBorderWidth*2)-(cellGap*(noOfCellRows-1)))/noOfCellRows;

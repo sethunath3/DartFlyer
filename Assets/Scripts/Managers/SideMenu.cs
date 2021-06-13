@@ -8,7 +8,7 @@ public class SideMenu : MonoBehaviour {
 	public Text userName;
 	// Use this for initialization
 	void Start () {
-		userName.text = GameManager.userInfo.name;
+		//userName.text = GameManager.userInfo.name;
 	}
 	
 	// Update is called once per frame
@@ -41,7 +41,10 @@ public class SideMenu : MonoBehaviour {
 
 	public void OnLogoutClick()
 	{
-		GameSceneManager.LoadScene("LoginSignup");
+		PlayerPrefs.SetString("SAVED_EMAIL", "");
+		PlayerPrefs.SetString("SAVED_PASSWORD", "");
+		PlayerPrefs.Save();
+		GameSceneManager.LoadScene("SignInScene");
 	}
 
 	public void OnContactUsClick()
