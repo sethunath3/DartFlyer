@@ -382,7 +382,7 @@ public class GamePlayManager : MonoBehaviour {
     	form.AddField("result", GetGameResultArray());
 
         //UnityWebRequest www = UnityWebRequest.Post("http://182.18.139.143/WITSCLOUD/DEVELOPMENT/dartweb/index.php/api/gameComplete", form);
-        UnityWebRequest www = UnityWebRequest.Post("https://dartplay.ml/index.php/api/gameComplete", form);
+        UnityWebRequest www = UnityWebRequest.Post("https://dartbet.io/index.php/api/gameComplete", form);
         www.SetRequestHeader("token", GameManager.userToken);
 		yield return www.SendWebRequest();
  

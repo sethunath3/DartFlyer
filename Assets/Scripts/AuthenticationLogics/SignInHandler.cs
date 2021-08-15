@@ -62,7 +62,7 @@ public class SignInHandler : MonoBehaviour {
         	form.AddField("password", password.text);
 
             //UnityWebRequest www = UnityWebRequest.Post("http://182.18.139.143/WITSCLOUD/DEVELOPMENT/dartweb/index.php/api/login", form);
-            UnityWebRequest www = UnityWebRequest.Post("https://dartplay.ml/index.php/Api/login", form);
+            UnityWebRequest www = UnityWebRequest.Post("https://dartbet.io/index.php/Api/login", form);
             yield return www.SendWebRequest();
 
         	if(www.isNetworkError || www.isHttpError) {
@@ -150,7 +150,7 @@ public class SignInHandler : MonoBehaviour {
 
 	public void NewPlayerClicked()
     {
-        Application.OpenURL("http://dartplay.ml/index.php/home/joinus");
+        Application.OpenURL("https://dartbet.io/index.php/home/joinus");
         //GameSceneManager.LoadScene("SignUpScene");
     }
 

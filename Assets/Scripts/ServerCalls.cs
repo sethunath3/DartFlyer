@@ -74,7 +74,7 @@ public static JSONNode ValidateUserWithEmail(string email, string password)
 public static JSONNode GetUserInfo()
 {
         //string requestString = String.Format("http://182.18.139.143/WITSCLOUD/DEVELOPMENT/dartweb/index.php/api/getUserInfo");
-        string requestString = String.Format("https://dartplay.ml/index.php/api/getUserInfo");
+        string requestString = String.Format("https://dartbet.io/index.php/api/getUserInfo");
         HttpWebRequest request = (HttpWebRequest)WebRequest.Create(requestString);
 	//request.Headers.Add("Authorization", "Bearer "+GameManager.userToken);
 	request.Headers.Add("token", GameManager.userToken);

@@ -49,7 +49,7 @@ public class HomeScreenController : MonoBehaviour {
 
 	public void OnRechargeBtnClick()
 	{
-		Application.OpenURL("http://182.18.139.143/crypto/load/load.html");
+		Application.OpenURL("https://dartbet.io/index.php/home/dashboard");
 		//GameSceneManager.LoadScene("WebviewScene");
 	}
 }

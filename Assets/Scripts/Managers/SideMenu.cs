@@ -15,7 +15,13 @@ public class SideMenu : MonoBehaviour {
 	void Update () {
 		
 	}
-	public void OpenPanel()
+
+    private void OnEnable()
+    {
+        userName.text = GameManager.userInfo.name;
+    }
+
+    public void OpenPanel()
 	{
 		if(sideMenu != null)
 		{
@@ -31,7 +37,6 @@ public class SideMenu : MonoBehaviour {
 		if(sideMenu != null)
 		{
 			Animator sideMenuAnim = sideMenu.GetComponent<Animator>();
-			Debug.Log("Hai ");
 			if(sideMenuAnim != null)
 			{
 				sideMenuAnim.SetBool("Open",false);
@@ -49,8 +54,9 @@ public class SideMenu : MonoBehaviour {
 
 	public void OnContactUsClick()
 	{
-		GameSceneManager.LoadScene("ContactUs");
-	}
+        //GameSceneManager.LoadScene("ContactUs");
+        Application.OpenURL("https://dartbet.io/index.php/home/support");
+    }
 
 	public void OnFeedBackClick()
 	{
@@ -59,8 +65,9 @@ public class SideMenu : MonoBehaviour {
 
 	public void OnGameGuideClick()
 	{
-		GameSceneManager.LoadScene("GameGuide");
-	}
+		//GameSceneManager.LoadScene("GameGuide");
+        Application.OpenURL("https://dartbet.io/index.php/home/playerGuide");
+    }
 
 	public void OnPlayDartClick()
 	{
