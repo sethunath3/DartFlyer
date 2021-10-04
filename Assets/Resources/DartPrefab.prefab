@@ -14,7 +14,6 @@ GameObject:
   - component: {fileID: 54792917498155866}
   - component: {fileID: 136817304726324500}
   - component: {fileID: 114347962682995660}
-  - component: {fileID: 65967736575811904}
   m_Layer: 0
   m_Name: DartPrefab
   m_TagString: Dart
@@ -110,12 +109,12 @@ CapsuleCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1737803488761612}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
-  m_Radius: 1.1468124
-  m_Height: 15.19474
+  m_Radius: 0.2955017
+  m_Height: 2.9691048
   m_Direction: 0
-  m_Center: {x: 31.820179, y: 17.155209, z: 5.366249}
+  m_Center: {x: 29.201788, y: 16.86771, z: 5.183647}
 --- !u!114 &114347962682995660
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -128,17 +127,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2224e8e4c0447842a936f8c185899da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gamePlayCamera: {fileID: 0}
---- !u!65 &65967736575811904
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1737803488761612}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 18.831192, y: 10.816391, z: 10.43559}
-  m_Center: {x: -29.0662, y: 16.95826, z: 5.217795}
+  capsuleColliderComponent: {fileID: 136817304726324500}
+  rigidBodyComponent: {fileID: 54792917498155866}

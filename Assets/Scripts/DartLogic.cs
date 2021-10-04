@@ -4,39 +4,42 @@ using UnityEngine;
 
 public class DartLogic : MonoBehaviour {
 
-	public GameObject gamePlayCamera;
+    [SerializeField] CapsuleCollider capsuleColliderComponent;
+    [SerializeField] Rigidbody rigidBodyComponent;
+    GamePlayManager gameplayManager;
 
-    
-		void OnCollisionEnter(Collision collision)
+    private void Start()
     {
-			if(collision.transform.gameObject.tag == "DartCube") 
-			{
-				Debug.Log("Case 1");
-				Destroy(gameObject.GetComponent<CapsuleCollider>());
-				Destroy(gameObject.GetComponent<Rigidbody>());
-				//Camera mainCamera= Camera.main;
-				Camera mainCamera = GameObject.FindWithTag("MainCamera").GetComponent<Camera>();
-				mainCamera.GetComponent<GamePlayManager>().SendMessage("HitOnDartBoard", collision.transform.gameObject);
-			}
-			else if(collision.transform.gameObject.tag == "DartBoard") 
-			{
-				Debug.Log("Case 2");
-				Destroy(gameObject.GetComponent<CapsuleCollider>());
-				Destroy(gameObject.GetComponent<Rigidbody>());
-				Camera mainCamera = GameObject.FindWithTag("MainCamera").GetComponent<Camera>();
-				mainCamera.GetComponent<GamePlayManager>().SendMessage("HitOnBoard");
-			}
-			else if(collision.transform.gameObject.tag == "Dart") 
-			{
-				Debug.Log("Case 3");
-				//DoNothing
-			}
-			else{
-				Debug.Log("Case 4");
-				Camera mainCamera = GameObject.FindWithTag("MainCamera").GetComponent<Camera>();
-				mainCamera.GetComponent<GamePlayManager>().SendMessage("ProcessNonHitThrowResult");
-				Destroy(gameObject);
-			}
-			
-		}
+        Camera mainCamera = GameObject.FindWithTag("MainCamera").GetComponent<Camera>();
+        gameplayManager = mainCamera.GetComponent<GamePlayManager>();
+    }
+
+    private void OnTriggerEnter(Collider collision)
+    {
+        rigidBodyComponent.isKinematic = true;
+        Destroy(rigidBodyComponent);
+        Destroy(capsuleColliderComponent);
+
+        if (collision.transform.gameObject.tag == "DartCube")
+        {
+            transform.parent = collision.transform;
+            //gameplayManager.HitOnDartBoard(collision.transform.gameObject);
+        }
+        else if (collision.transform.gameObject.tag == "DartBoard")
+        {
+            //gameplayManager.HitOnBoard();
+            gameplayManager.ProcessNonHitThrowResult();
+        }
+        else if (collision.transform.gameObject.tag == "Dart")
+        {
+            Debug.Log("Case 3");
+            //DoNothing
+        }
+        else
+        {
+            Debug.Log("Case 4");
+            gameplayManager.ProcessNonHitThrowResult();
+            Destroy(gameObject);
+        }
+    }
 }

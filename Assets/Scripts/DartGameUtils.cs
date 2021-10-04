@@ -39,7 +39,7 @@ public class GameHistory
 }
 
 
-public class DartGameUtils : MonoBehaviour {
+public class DartGameUtils {
 
 	public string baseURL = "http://182.18.139.143:8282/public/webresources/app/api/v1/account/login";
 
@@ -53,12 +53,12 @@ public class DartGameUtils : MonoBehaviour {
 
 	public Dictionary<int, Color> colourMap = new Dictionary<int, Color>() 
 	{
-        {6, Color.red},
         {1, Color.green},
         {2, Color.yellow},
 		{3, Color.blue},
 		{4, Color.black},
-		{5, Color.white}
+		{5, Color.white},
+        {6, Color.red}
     };
 
 	 public int[] betamountList = new int[] {1,2,3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};

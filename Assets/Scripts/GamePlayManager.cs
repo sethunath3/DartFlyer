@@ -18,6 +18,7 @@ public class GamePlayManager : MonoBehaviour {
     public GameObject hudCanvas;
     public GameObject toastBg;
     [SerializeField] GameObject pauseUi;
+    [SerializeField] DartBoard dartBoard;
     private int[] throwResultArray;
 
     private int exitScreen = 1;//BidSelectScreen
@@ -27,10 +28,8 @@ public class GamePlayManager : MonoBehaviour {
     private Vector3 CAMERA_MEAN_POS = new Vector3(2.55f,18.5f,0.0f);
     private Vector3 CAMERA_INIT_POS = new Vector3(-5.0f,18.5f, -10.0f);
 
-    
+    [SerializeField] float colorReshuffleTime;
 
-
-    
 
     int noOfDarts = 0;
     int noOfDartsThrown = 0;
@@ -49,14 +48,16 @@ public class GamePlayManager : MonoBehaviour {
     float swipeEndTime;
     float swipeDuration;
 
+    float colorReshuffleTimer = 0;
+
     int currentBetColor;
+
+    bool enableColorTimer = false;
 	
 	void Start () {
-        //cheat
 
         isGameScreenInteractable = false;
         pauseUi.SetActive(false);
-
         if (GameManager.GetInstance().lobbyEntryTime)
         {
             //CreateScreenToast("",1);
@@ -79,7 +80,8 @@ public class GamePlayManager : MonoBehaviour {
         isDartThrown =false;
         isHold = false;
         hudCanvas.GetComponent<CommentaryManager>().ResetIndicatorPanel();
-
+        colorReshuffleTimer = colorReshuffleTime;
+        enableColorTimer = true;
         string toasterMsg = "";
         noOfDarts = 3;
         noOfDartsThrown = 0;
@@ -93,7 +95,8 @@ public class GamePlayManager : MonoBehaviour {
             currentBetColor =  GameManager.playerBets[0].BetColour;
         }
 
-        switch(currentBetColor)
+        hudCanvas.GetComponent<CommentaryManager>().SetTargetColor(currentBetColor);
+        switch (currentBetColor)
         {
             case 1:
                 toasterMsg = "Aim for GREEN";
@@ -114,6 +117,7 @@ public class GamePlayManager : MonoBehaviour {
             toasterMsg = "Aim for RED";
             break;
         }
+        toasterMsg = toasterMsg + ".\n Be quick, board reshuffles every second";
         CreateScreenToast(toasterMsg,2);
         throwResultArray = new int[noOfDarts];
 
@@ -128,8 +132,18 @@ public class GamePlayManager : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-        
-        if(!isGameScreenInteractable)
+        if(enableColorTimer)
+        {
+            colorReshuffleTimer -= Time.deltaTime;
+            if(colorReshuffleTimer < 0)
+            {
+                colorReshuffleTimer = colorReshuffleTime;
+                dartBoard.ReShuffleColors();
+            }
+        }
+
+
+        if (!isGameScreenInteractable)
         {
             return;
         }
@@ -147,7 +161,6 @@ public class GamePlayManager : MonoBehaviour {
             
 
 
-// ..............codes for testing puurpose
             if(Input.GetButtonDown("Fire1"))
             {
                 StartSwipe();
@@ -212,7 +225,8 @@ public class GamePlayManager : MonoBehaviour {
 		Vector3 p = camera.ScreenToWorldPoint(new Vector3(startPos.x, startPos.y,camera.nearClipPlane + 5.5f ));
         currentDart = (GameObject)Instantiate(dart,new Vector3(p.x,p.y,p.z),Quaternion.identity);
         // currentDart = (GameObject)PhotonNetwork.Instantiate("DartPrefab",new Vector3(p.x,p.y,p.z),Quaternion.identity,0);
-        currentDart.transform.Rotate(0,270,10);
+        //currentDart.transform.Rotate(0,270,10);
+        currentDart.transform.Rotate(0, 270, 5);
         currentDart.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
         currentDart.SetActive(true);
         currentDart.GetComponent<Rigidbody>().useGravity = false;
@@ -230,9 +244,9 @@ public class GamePlayManager : MonoBehaviour {
 
 		// add force to balls rigidbody in 3D space depending on swipe time, direction and throw forces
 		currentDart.GetComponentInChildren<Rigidbody>().isKinematic = false;
-        if(direction.x != 0 || direction.y != 0)
+        if(Mathf.Abs( direction.x) >= 2.0f || Mathf.Abs(direction.y) >= 2.0f)
         {
-            currentDart.GetComponentInChildren<Rigidbody>().AddForce (-direction.x * xForce,  -direction.y * yForce, (zForce / swipeDuration)*200);
+            currentDart.GetComponentInChildren<Rigidbody>().AddForce (-direction.x * xForce,  -direction.y * yForce, (zForce / swipeDuration)*150);
         }
 
         currentDart.SetActive(true);    
@@ -242,33 +256,35 @@ public class GamePlayManager : MonoBehaviour {
 
         currentDart = null;
 
-        // Invoke("ProcessNonHitThrowResult",3);
+        Invoke("ProcessNonHitThrowResult",3);
     }
 
-    public void HitOnDartBoard(GameObject dartCell)
+    public void HitOnDartBoard(Color cellColor)
     {
+        enableColorTimer = false;
         FindObjectOfType<AudioEffectsController>().Play("HitSound");
 
         // Debug.Log("Collided with dart Cube");
-        Material m_Material = dartCell.GetComponent<Renderer>().material;
-        Color cellColor = (Color)(m_Material.color);
         DartGameUtils gameUti = new DartGameUtils();
-        if(cellColor.Equals(gameUti.colourMap[currentBetColor]))
+        if(cellColor == (gameUti.colourMap[currentBetColor]))
         {
+            Debug.Log("Hit on correct color: " + cellColor.ToString() + ", aim: " + gameUti.colourMap[currentBetColor].ToString());
             throwResultArray[noOfDartsThrown-1] = 1;
             hudCanvas.GetComponent<CommentaryManager>().ToggleIndicator(noOfDartsThrown,1);
         }
         else{
+            Debug.Log("Hit on wrong color: " + cellColor.ToString() + ", aim: " + gameUti.colourMap[currentBetColor].ToString());
             throwResultArray[noOfDartsThrown-1] = 0;
             hudCanvas.GetComponent<CommentaryManager>().ToggleIndicator(noOfDartsThrown,2);
         }
-        ProcessResultAndProceedToNext();
+        StartCoroutine( ProcessResultAndProceedToNext());
     }
 
     public void HitOnBoard()
     {
         if(throwResultArray[noOfDartsThrown-1]==2)
         {
+            enableColorTimer = false;
             // throwResultArray[noOfDartsThrown-1] = 2;
             // hudCanvas.GetComponent<CommentaryManager>().ToggleIndicator(noOfDartsThrown,2);
             // noOfDartsThrown--;
@@ -278,13 +294,14 @@ public class GamePlayManager : MonoBehaviour {
             //dart didnt hit on the board
             // isDartThrown = false;
         }
-        ProcessResultAndProceedToNext();
+        StartCoroutine( ProcessResultAndProceedToNext());
     }
 
     public void ProcessNonHitThrowResult()
     {
-        if(throwResultArray[noOfDartsThrown-1]==2)
+        if (throwResultArray[noOfDartsThrown-1]==2)
         {
+            enableColorTimer = true;
             // throwResultArray[noOfDartsThrown-1] = 2;
             // hudCanvas.GetComponent<CommentaryManager>().ToggleIndicator(noOfDartsThrown,2);
             noOfDartsThrown--;
@@ -294,16 +311,16 @@ public class GamePlayManager : MonoBehaviour {
         }
     }
 
-    private void ProcessResultAndProceedToNext()
+    private IEnumerator ProcessResultAndProceedToNext()
     {
-        if(noOfDartsThrown >= noOfDarts)
+        Vector3 v3 = transform.rotation.eulerAngles;
+        Sequence mySequence = DOTween.Sequence();
+        mySequence.Append(transform.DOMove(new Vector3(-7.0f, CAMERA_MEAN_POS.y, 10.0f), 1));
+        mySequence.Insert(0, transform.DORotate(new Vector3(0, 50, 0), 1));
+        mySequence.Append(transform.DORotate(new Vector3(0, 0, 0), 1).SetDelay(1));
+        mySequence.Insert(1, transform.DOMove(CAMERA_MEAN_POS, 1).SetDelay(1));
+        if (noOfDartsThrown >= noOfDarts)
         {
-            Vector3 v3 = transform.rotation.eulerAngles;
-            Sequence mySequence = DOTween.Sequence();
-            mySequence.Append(transform.DOMove(new Vector3(-7.0f,CAMERA_MEAN_POS.y, 10.0f), 1));
-            mySequence.Insert(0,transform.DORotate(new Vector3(0, 50, 0), 1));
-            mySequence.Append(transform.DORotate(new Vector3(0, 0, 0), 1).SetDelay(1));
-            mySequence.Insert(1,transform.DOMove(CAMERA_MEAN_POS, 1).SetDelay(1));
             int score = 0;
             for(int i =0; i<noOfDarts; i++)
             {
@@ -340,12 +357,20 @@ public class GamePlayManager : MonoBehaviour {
                 Invoke("RefreshScene", 4);
             }
         }
+        yield return new WaitForSeconds(4f);
+        DartLogic[] allDarts = FindObjectsOfType<DartLogic>();
+        foreach (DartLogic obj in allDarts)
+        {
+            Destroy(obj.gameObject);
+        }
         isDartThrown = false;
+        colorReshuffleTimer = colorReshuffleTime;
+        dartBoard.ReShuffleColors();
+        enableColorTimer = true;
     }
 
     private void RefreshScene()
     {
-        Debug.Log("Yes it is practice");
         if(GameManager.GetInstance().GetCurrentGameMode() == DartGameUtils.GameMode.PracticeMode)
         {
             GameSceneManager.LoadScene("GamePlayScene");
@@ -354,11 +379,6 @@ public class GamePlayManager : MonoBehaviour {
 
     string GetGameResultArray()
     {
-        /*string gameResultArray = "[{\"id\":\"" + GameManager.currentGameBetId +
-        "\",\"t1\":\"" + throwResultArray[0].ToString() +
-        "\",\"t2\":\"" + throwResultArray[1].ToString() +
-        "\",\"t3\":\"" + throwResultArray[2].ToString() +
-        "\"}]";*/
 
         for(int i =0; i<noOfDarts; i++)
         {
@@ -381,7 +401,6 @@ public class GamePlayManager : MonoBehaviour {
         form.AddField("gameId", GameManager.currentGameId);
     	form.AddField("result", GetGameResultArray());
 
-        //UnityWebRequest www = UnityWebRequest.Post("http://182.18.139.143/WITSCLOUD/DEVELOPMENT/dartweb/index.php/api/gameComplete", form);
         UnityWebRequest www = UnityWebRequest.Post("https://dartbet.io/index.php/api/gameComplete", form);
         www.SetRequestHeader("token", GameManager.userToken);
 		yield return www.SendWebRequest();
@@ -419,8 +438,6 @@ public class GamePlayManager : MonoBehaviour {
                     else{
                         FindObjectOfType<GenericPopup>().SetTextTo("Better Luck Next time");
                     }
-
-                    Debug.Log("This is happening");
 				}
 				//else{
 					//Destroy(loader);
@@ -458,7 +475,7 @@ public class GamePlayManager : MonoBehaviour {
 	{
         exitScreen = _exitScreen;
         noOfDartsThrown = noOfDarts;
-        ProcessResultAndProceedToNext();
+        StartCoroutine(ProcessResultAndProceedToNext());
         pauseUi.SetActive(false);
 
     }

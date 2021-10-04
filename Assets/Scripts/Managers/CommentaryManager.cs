@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-public class CommentaryManager : MonoBehaviour {
+public class CommentaryManager : MonoBehaviour
+{
 
 const int DART1 = 1;
 const int DART2 = 2;
@@ -12,6 +13,7 @@ public Text ToastText;
 public GameObject Shoot1,Shoot2,Shoot3;
 public int bulb = 0 ,dart = 0;
 public string resourceName = "Backgrounds";
+[SerializeField] Image targetColor;
 
  public Sprite[] backgrounds = new Sprite[3];
 
@@ -43,4 +45,10 @@ public string resourceName = "Backgrounds";
 		string panelID = "Off" + indicatorID;
 		GameObject.Find (panelID).GetComponent<Image> ().sprite = backgrounds[state];
 	}
+
+    public void SetTargetColor(int currentColor)
+    {
+        DartGameUtils gameUti = new DartGameUtils();
+        targetColor.color = gameUti.colourMap[currentColor];
+    }
 }
