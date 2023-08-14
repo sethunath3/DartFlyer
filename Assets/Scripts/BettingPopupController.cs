@@ -38,7 +38,7 @@ public class BettingPopupController : MonoBehaviour {
 
 	public void ONBetUpBtnClicked()
 	{
-		if(betAmountIndex >= gameUtil.betamountList.Length-1)
+		if(betAmountIndex >= GameManager.betamountList.Length-1)
 		{
 			betAmountIndex = 0;
 		}
@@ -52,7 +52,7 @@ public class BettingPopupController : MonoBehaviour {
 	{
 		if(betAmountIndex == 0)
 		{
-			betAmountIndex = gameUtil.betamountList.Length-1;
+			betAmountIndex = GameManager.betamountList.Length-1;
 		}
 		else
 		{
@@ -87,7 +87,7 @@ public class BettingPopupController : MonoBehaviour {
 
 	private void RefreshComponentsAndData()
 	{
-		_betAmountindicator.text = gameUtil.betamountList[betAmountIndex].ToString();
+		_betAmountindicator.text = GameManager.betamountList[betAmountIndex].ToString();
 		_betColorIndicator.GetComponent<Image>().color = (Color)gameUtil.colourMap[colorIndex];
 	}
 
@@ -95,7 +95,7 @@ public class BettingPopupController : MonoBehaviour {
 	{
 		DartGameUtils.BetStructure betStruct = new DartGameUtils.BetStructure
 		{
-			BetAmount = gameUtil.betamountList[betAmountIndex],
+			BetAmount = GameManager.betamountList[betAmountIndex],
 			BetColour = colorIndex
 		};
 		GameManager.playerBets.Clear();

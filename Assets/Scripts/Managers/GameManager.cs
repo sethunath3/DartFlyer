@@ -17,9 +17,11 @@ public class GameManager  : MonoBehaviour{
 	public static UserInfo userInfo;
     public static List<GameHistory> gameHistory = new List<GameHistory>();
     public static string userToken;
+    public static int maxBet;
+    public static int[] betamountList;
 
 
-	private static GameManager Instance;
+    private static GameManager Instance;
 
     private void Awake() {
          if (Instance == null) {

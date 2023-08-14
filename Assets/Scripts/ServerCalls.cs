@@ -77,7 +77,7 @@ public static JSONNode GetUserInfo()
         string requestString = String.Format("https://dartbet.io/index.php/api/getUserInfo");
         HttpWebRequest request = (HttpWebRequest)WebRequest.Create(requestString);
 	//request.Headers.Add("Authorization", "Bearer "+GameManager.userToken);
-	request.Headers.Add("token", GameManager.userToken);
+	request.Headers.Add("Token", GameManager.userToken);
     request.Timeout = 9000;
 	request.Method = "POST";
 

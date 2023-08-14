@@ -24,7 +24,7 @@ public class SingleBetHandler : MonoBehaviour {
         genericInfoPopup.gameObject.SetActive(false);
         userName.text = GameManager.userInfo.name;
 		gameUtil = new DartGameUtils();
-		betAmount = gameUtil.betamountList[gameUtil.betamountList.Length-1];
+		betAmount = GameManager.betamountList[0];
 		betColour = UnityEngine.Random.Range(1,7);
 		GameManager.playerBets.Clear();
 		DartGameUtils.BetStructure betStruct = new DartGameUtils.BetStructure
@@ -88,7 +88,7 @@ public class SingleBetHandler : MonoBehaviour {
 
         //UnityWebRequest www = UnityWebRequest.Post("http://182.18.139.143/WITSCLOUD/DEVELOPMENT/dartweb/index.php/api/createGameRoom", form);
         UnityWebRequest www = UnityWebRequest.Post("https://dartbet.io/index.php/api/createGameRoom", form);
-        www.SetRequestHeader("token", GameManager.userToken);
+        www.SetRequestHeader("Token", GameManager.userToken);
 		yield return www.SendWebRequest();
  
         if(www.isNetworkError || www.isHttpError) {

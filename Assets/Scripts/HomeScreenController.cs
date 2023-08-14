@@ -17,7 +17,13 @@ public class HomeScreenController : MonoBehaviour {
 		uName.text = ": "+GameManager.userInfo.name;
 		email.text = ": "+GameManager.userInfo.email;
 		walletBalance.text = "Amount in your wallet: "+ GameManager.userInfo.walletAmount;
-		earningsValue.text = ": $"+(GameManager.gameHistory[0].totalEarning + GameManager.gameHistory[1].totalEarning + GameManager.gameHistory[2].totalEarning).ToString();
+		long gain = GameManager.gameHistory[0].totalEarning + GameManager.gameHistory[1].totalEarning + GameManager.gameHistory[2].totalEarning;
+		string currency = " Dart Coin";
+		if (gain > 1)
+		{
+			currency += "s";
+		}
+		earningsValue.text = ": "+(GameManager.gameHistory[0].totalEarning + GameManager.gameHistory[1].totalEarning + GameManager.gameHistory[2].totalEarning).ToString() + currency;
 		winningStrikes.text = ": "+(GameManager.gameHistory[0].winningStrike + GameManager.gameHistory[1].winningStrike + GameManager.gameHistory[2].winningStrike).ToString();
 		totalGames.text = ": "+(GameManager.gameHistory[0].totalMatches + GameManager.gameHistory[1].totalMatches + GameManager.gameHistory[2].totalMatches).ToString();
 	}

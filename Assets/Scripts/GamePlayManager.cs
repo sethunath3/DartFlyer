@@ -402,7 +402,7 @@ public class GamePlayManager : MonoBehaviour {
     	form.AddField("result", GetGameResultArray());
 
         UnityWebRequest www = UnityWebRequest.Post("https://dartbet.io/index.php/api/gameComplete", form);
-        www.SetRequestHeader("token", GameManager.userToken);
+        www.SetRequestHeader("Token", GameManager.userToken);
 		yield return www.SendWebRequest();
  
         if(www.isNetworkError || www.isHttpError) {
@@ -433,7 +433,12 @@ public class GamePlayManager : MonoBehaviour {
                     FindObjectOfType<GenericPopup>().ShowPopup();
                     if(gain > 0)
                     {
-                        FindObjectOfType<GenericPopup>().SetTextTo("hurreeyyy.....You Won " + gain.ToString() + " Montero");
+                        string currency = " Dart Coin";
+                        if(gain > 1)
+                        {
+                            currency += "s";
+                        }
+                        FindObjectOfType<GenericPopup>().SetTextTo("hurreeyyy.....You Won " + gain.ToString() + currency);
                     }
                     else{
                         FindObjectOfType<GenericPopup>().SetTextTo("Better Luck Next time");

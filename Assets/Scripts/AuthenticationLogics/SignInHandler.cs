@@ -42,6 +42,14 @@ public class SignInHandler : MonoBehaviour {
 		StartCoroutine(DoLogin());
 	}
 
+	public class CertificateWhore : CertificateHandler
+	{
+		protected override bool ValidateCertificate(byte[] certificateData)
+		{
+			return true;
+		}
+	}
+
 	IEnumerator DoLogin()
 	{
 		//cheat
@@ -61,9 +69,9 @@ public class SignInHandler : MonoBehaviour {
         	form.AddField("email", email.text);
         	form.AddField("password", password.text);
 
-            //UnityWebRequest www = UnityWebRequest.Post("http://182.18.139.143/WITSCLOUD/DEVELOPMENT/dartweb/index.php/api/login", form);
             UnityWebRequest www = UnityWebRequest.Post("https://dartbet.io/index.php/Api/login", form);
-            yield return www.SendWebRequest();
+			www.certificateHandler = new CertificateWhore();
+			yield return www.SendWebRequest();
 
         	if(www.isNetworkError || www.isHttpError) {
             	Debug.Log(www.error);
@@ -101,6 +109,44 @@ public class SignInHandler : MonoBehaviour {
 							PlayerPrefs.SetString("SAVED_EMAIL", email.text);
 							PlayerPrefs.SetString("SAVED_PASSWORD", password.text);
 							PlayerPrefs.Save();
+						}
+
+						UnityWebRequest www2 = UnityWebRequest.Get("https://dartbet.io/countadmin/myapi.php");
+						//www.SetRequestHeader("Token", GameManager.userToken);
+						yield return www2.SendWebRequest();
+
+						if (www2.isNetworkError || www2.isHttpError)
+						{
+							Debug.Log(www2.error);
+						}
+						else
+						{
+							Debug.Log("Form upload complete!");
+							StringBuilder sb1 = new StringBuilder();
+							foreach (System.Collections.Generic.KeyValuePair<string, string> dict in www2.GetResponseHeaders())
+							{
+								sb1.Append(dict.Key).Append(": \t[").Append(dict.Value).Append("]\n");
+							}
+
+							// Print Headers
+							Debug.Log(sb1.ToString());
+
+							// Print Body
+							Debug.Log(www2.downloadHandler.text);
+
+							//ResponseVO info = JsonUtility.FromJson<ResponseVO>(www.downloadHandler.text);
+							JSONNode jsonNode = SimpleJSON.JSON.Parse(www2.downloadHandler.text);
+							GameManager.maxBet = jsonNode["count"];
+							GameManager.betamountList = new int[GameManager.maxBet];
+							for(int i = 1; i <= GameManager.maxBet; i++)
+                            {
+								GameManager.betamountList[i-1] = i;
+                            }
+							/*if (jsonNode["status"].Value == "Success")
+							{
+								Destroy(FindObjectOfType<AudioManager>());
+								GameSceneManager.LoadScene("GamePlayScene");
+							}*/
 						}
 						GameSceneManager.LoadScene("HomeScreen");
 					}
